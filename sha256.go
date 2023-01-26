@@ -53,11 +53,13 @@ func RotateLeft(a uint32, b int) uint32 {
 	return (a << b) | (a >> (32 - b))
 }
 
-func Add(a, b uint32) (sum uint32) {
-	var cin uint32
-	sum = a ^ b ^ cin
-	//cout = (a & b) | (cin & (a ^ b))
-	return
+func Add(a, b uint32) uint32 {
+	mod_32 := 4294967296
+	var res uint64
+	res = uint64(a)
+	res += uint64(b)
+	res %= uint64(mod_32)
+	return uint32(res)
 }
 
 func Usersha256(paddedData []byte) []byte {
@@ -80,8 +82,8 @@ func Usersha256(paddedData []byte) []byte {
 		for j := 16; j < 64; j++ {
 			s0 = RotateRight(w[j-15], 7) ^ RotateRight(w[j-15], 18) ^ (w[j-15] >> 3)
 			s1 = RotateRight(w[j-2], 17) ^ RotateRight(w[j-2], 19) ^ (w[j-2] >> 10)
-			//w[j] = Add(Add(Add(w[j-16], s0), w[j-7]), s1)
-			w[j] = w[j-16] + s0 + w[j-7] + s1
+			w[j] = Add(Add(Add(w[j-16], s0), w[j-7]), s1)
+			//w[j] = w[j-16] + s0 + w[j-7] + s1
 		}
 		a := h[0]
 		b := h[1]
@@ -112,22 +114,22 @@ func Usersha256(paddedData []byte) []byte {
 		for j := 0; j < 64; j++ {
 			s1 = RotateRight(e, 6) ^ RotateRight(e, 11) ^ RotateRight(e, 25)
 			ch := (e & f) ^ ((^e) & g)
-			//temp1 := Add(Add(Add(Add(h, s1), ch), K[j]), w[j])
-			temp1 := hh + s1 + ch + K[j] + w[j]
+			temp1 := Add(Add(Add(Add(hh, s1), ch), K[j]), w[j])
+			//temp1 := hh + s1 + ch + K[j] + w[j]
 			s0 = RotateRight(a, 2) ^ RotateRight(a, 13) ^ RotateRight(a, 22)
 			m := (a & b) ^ (a & c) ^ (b & c)
-			//temp2 := Add(s0, m)
-			temp2 := s0 + m
+			temp2 := Add(s0, m)
+			//temp2 := s0 + m
 			hh = g
 			g = f
 			f = e
-			//e = Add(d, temp1)
-			e = d + temp1
+			e = Add(d, temp1)
+			//e = d + temp1
 			d = c
 			c = b
 			b = a
-			//a = Add(temp1, temp2)
-			a = temp1 + temp2
+			a = Add(temp1, temp2)
+			//a = temp1 + temp2
 		}
 
 		h[0] += a
@@ -150,7 +152,7 @@ func Usersha256(paddedData []byte) []byte {
 
 func main() {
 
-	inputmessage := "a"
+	inputmessage := "duh.."
 	message := []byte(inputmessage)
 
 	paddedData := PaddedData(inputmessage)
