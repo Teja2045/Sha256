@@ -152,7 +152,7 @@ func Usersha256(paddedData []byte) []byte {
 
 func main() {
 
-	inputmessage := "duh.."
+	inputmessage := "vitwitcom"
 	message := []byte(inputmessage)
 
 	paddedData := PaddedData(inputmessage)
